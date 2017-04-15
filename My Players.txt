@@ -1,0 +1,4 @@
+SimpleMajorityPlayer
+ExpectedUtilityPlayer
+HybridPlayer
+TolerantDetectingPlayer

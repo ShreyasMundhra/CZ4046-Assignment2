@@ -1,3 +1,7 @@
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+
 public class ThreePrisonersDilemma {
 	
 	/* 
@@ -203,6 +207,174 @@ public class ThreePrisonersDilemma {
 		}
 	}
 
+	class HybridPlayer extends ExpectedUtilityPlayer{
+		int selectAction(int n, int[] myHistory, int[] oppHistory1, int[] oppHistory2) {
+			float[] scores = calculateScores(myHistory, oppHistory1, oppHistory2);
+			
+			if(scores[1] < scores[0] || scores[2] < scores[0]){
+//				return super.selectAction(n, myHistory, oppHistory1, oppHistory2);
+				return switchToSimpleMajority(n, myHistory, oppHistory1, oppHistory2);
+			}			
+			else {
+//				return switchToSimpleMajority(n, myHistory, oppHistory1, oppHistory2);
+				return super.selectAction(n, myHistory, oppHistory1, oppHistory2);
+			}
+			
+		}
+		
+		int switchToSimpleMajority(int n, int[] myHistory, int[] oppHistory1, int[] oppHistory2){
+			int opponentCoop1 = 0, opponentCoop2 = 0;
+			int predAction1, predAction2;
+			
+			for(int i = 0; i < n; i++){
+				if(oppHistory1[i] == 0){
+					opponentCoop1 += 1;
+				}
+				if(oppHistory2[i] == 0){
+					opponentCoop2 += 1;
+				}
+			}
+			
+			if(opponentCoop1 > n/2)
+				predAction1 = 0;
+			else
+				predAction1 = 1;
+			
+			if(opponentCoop2 > n/2)
+				predAction2 = 0;
+			else
+				predAction2 = 1;
+			
+			if(payoff[0][predAction1][predAction2] > payoff[1][predAction1][predAction2])
+				return 0;
+			
+			return 1;
+		}
+		
+		float[] calculateScores(int[] myHistory, int[] oppHistory1, int[] oppHistory2){
+			int rounds = myHistory.length;
+			float ScoreA = 0, ScoreB = 0, ScoreC = 0;
+			
+			for (int i=0; i<rounds; i++) {
+				ScoreA = ScoreA + payoff[myHistory[i]][oppHistory1[i]][oppHistory2[i]];
+				ScoreB = ScoreB + payoff[oppHistory1[i]][oppHistory2[i]][myHistory[i]];
+				ScoreC = ScoreC + payoff[oppHistory2[i]][myHistory[i]][oppHistory1[i]];
+			}
+			
+			float[] result = {ScoreA/rounds, ScoreB/rounds, ScoreC/rounds};
+			return result;
+		}
+		
+	}
+	
+	class TolerantDetectingPlayer extends HybridPlayer{
+		int selectAction(int n, int[] myHistory, int[] oppHistory1, int[] oppHistory2) {
+			if(n < 10)
+				return super.selectAction(n, myHistory, oppHistory1, oppHistory2);
+			
+			boolean[] arePlayersTolerant = detectTolerantPlayer(n, myHistory, oppHistory1, oppHistory2);
+			int[] tolerantActions = new int[2];
+			
+			tolerantActions[0] = findActionOfTolerantPlayer(n, myHistory, oppHistory2, oppHistory1);
+			tolerantActions[1] = findActionOfTolerantPlayer(n, myHistory, oppHistory1, oppHistory2);
+			
+			//TODO: Think what value to assign in case of "-1"
+			if(tolerantActions[0] == -1)
+				tolerantActions[0] = 0;
+			
+			if(tolerantActions[1] == -1)
+				tolerantActions[1] = 0;
+			
+			if(arePlayersTolerant[0] && arePlayersTolerant[1]){
+				float coopPayoff = payoff[0][tolerantActions[0]][tolerantActions[1]];
+				float defectPayoff = payoff[1][tolerantActions[0]][tolerantActions[1]];
+				if(coopPayoff > defectPayoff){
+					return 0;
+				}
+				
+				return 1;
+			}
+			
+			if(arePlayersTolerant[0] || arePlayersTolerant[1]){
+				int opp1Action, opp2Action;
+				
+				if(arePlayersTolerant[0])
+					opp1Action = tolerantActions[0];
+				else
+					opp1Action = findMajorityAction(n, oppHistory1);
+				
+				if(arePlayersTolerant[1])
+					opp2Action = tolerantActions[1];
+				else
+					opp2Action = findMajorityAction(n, oppHistory2);
+				
+				float coopPayoff = payoff[0][opp1Action][opp2Action];
+				float defectPayoff = payoff[1][opp1Action][opp2Action];
+				if(coopPayoff > defectPayoff){
+					return 0;
+				}
+				return 1;
+			}
+			
+			return super.selectAction(n, myHistory, oppHistory1, oppHistory2);	
+		}
+		
+		int findMajorityAction(int n, int[] oppHistory){
+			int oppDefect = 0;
+			for(int i = 0; i < n; i++){
+				oppDefect = oppDefect + oppHistory[i];
+			}
+			
+			if(oppDefect >= n/2)
+				return 1;
+			
+			return 0;
+		}
+		
+		int findActionOfTolerantPlayer(int n, int[] myHistory, int[] innocentOppHistory, int[] tolerantOppHistory){
+			int coopCount = 0;
+			int defectCount = 0;
+			for (int i = 0; i < n; i++) {
+				if (myHistory[i] == 0)
+					coopCount = coopCount + 1;
+				else
+					defectCount = defectCount + 1;
+			}
+			for (int i = 0; i < n; i++) {
+				if (innocentOppHistory[i] == 0)
+					coopCount = coopCount + 1;
+				else
+					defectCount = defectCount + 1;
+			}
+			
+			if(coopCount > defectCount)
+				return 0;
+			else if (coopCount < defectCount)
+				return 1;
+			
+			return -1;
+		}
+		
+		boolean[] detectTolerantPlayer(int n, int[] myHistory, int[] oppHistory1, int[] oppHistory2){
+			boolean isOpp1Tolerant = checkIfPlayerTolerant(n, myHistory, oppHistory2, oppHistory1);
+			boolean isOpp2Tolerant = checkIfPlayerTolerant(n, myHistory, oppHistory1, oppHistory2);
+			
+			return new boolean[] {isOpp1Tolerant, isOpp2Tolerant};
+		}
+		
+		boolean checkIfPlayerTolerant(int n, int[] myHistory, int[] innocentOppHistory, int[] suspectHistory){			
+			for(int i = 0; i < n; i++){
+				int tolerantAction = findActionOfTolerantPlayer(i, myHistory, innocentOppHistory, suspectHistory);
+				
+				if(tolerantAction == -1)
+					continue;
+				
+				if(suspectHistory[i] != tolerantAction)
+					return false;
+			}
+			return true;
+		}
+	}
 	
 	/* In our tournament, each pair of strategies will play one match against each other. 
 	 This procedure simulates a single match and returns the scores. */
@@ -239,7 +411,7 @@ public class ThreePrisonersDilemma {
 	 (strategies) in between matches. When you add your own strategy,
 	 you will need to add a new entry to makePlayer, and change numPlayers.*/
 	
-	int numPlayers = 8;
+	int numPlayers = 10;
 	Player makePlayer(int which) {
 		switch (which) {
 		case 0: return new NicePlayer();
@@ -250,6 +422,8 @@ public class ThreePrisonersDilemma {
 		case 5: return new T4TPlayer();
 		case 6: return new SimpleMajorityPlayer();
 		case 7: return new ExpectedUtilityPlayer();
+		case 8: return new HybridPlayer();
+		case 9: return new TolerantDetectingPlayer();
 		}
 		throw new RuntimeException("Bad argument passed to makePlayer");
 	}
@@ -297,12 +471,25 @@ public class ThreePrisonersDilemma {
 			sortedOrder[j+1] = i;
 		}
 		
+		//---------------TEST----------------//
+		HashMap<String, Float> latestPlayerPoints = new HashMap<>();
+		//---------------TEST----------------//
+		
 		// Finally, print out the sorted results.
 		if (verbose) System.out.println();
 		System.out.println("Tournament Results");
-		for (int i=0; i<numPlayers; i++) 
+		for (int i=0; i<numPlayers; i++) {
 			System.out.println(makePlayer(sortedOrder[i]).name() + ": " 
 				+ totalScore[sortedOrder[i]] + " points.");
+		
+			//---------------TEST----------------//
+			latestPlayerPoints.put(makePlayer(sortedOrder[i]).name(), totalScore[sortedOrder[i]]);
+			//---------------TEST----------------//
+		}
+		
+		//---------------TEST----------------//
+		FileIO.updateFile(latestPlayerPoints);
+		//---------------TEST----------------//
 		
 	} // end of runTournament()
 	

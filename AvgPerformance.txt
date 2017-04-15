@@ -1,0 +1,11 @@
+ExpectedUtilityPlayer:221.7753
+Number of tournaments:20
+RandomPlayer:189.87538
+NicePlayer:171.3851
+SimpleMajorityPlayer:218.32227
+FreakyPlayer:193.02599
+T4TPlayer:215.03079
+TolerantPlayer:221.20015
+NastyPlayer:219.66853
+TolerantDetectingPlayer:220.79385
+HybridPlayer:218.0552
