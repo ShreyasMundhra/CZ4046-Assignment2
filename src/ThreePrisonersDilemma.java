@@ -125,6 +125,83 @@ public class ThreePrisonersDilemma {
 				return oppHistory2[n-1];
 		}	
 	}
+	
+	class SimpleMajorityPlayer extends Player {
+		//Predicts opponents' moves based on majority of their past moves
+		//And decides own moves accordingly
+		int selectAction(int n, int[] myHistory, int[] oppHistory1, int[] oppHistory2) {
+			int opponentCoop1 = 0, opponentCoop2 = 0;
+			int predAction1, predAction2;
+			
+			for(int i = 0; i < n; i++){
+				if(oppHistory1[i] == 0){
+					opponentCoop1 += 1;
+				}
+				if(oppHistory2[i] == 0){
+					opponentCoop2 += 1;
+				}
+			}
+			
+			if(opponentCoop1 > n/2)
+				predAction1 = 0;
+			else
+				predAction1 = 1;
+			
+			if(opponentCoop2 > n/2)
+				predAction2 = 0;
+			else
+				predAction2 = 1;
+			
+			if(payoff[0][predAction1][predAction2] > payoff[1][predAction1][predAction2])
+				return 0;
+			
+			return 1;
+		}	
+	}
+	
+	class ExpectedUtilityPlayer extends Player {
+		//Finds expected utility for each action
+		// And performs action that maximises expected utility
+		int selectAction(int n, int[] myHistory, int[] oppHistory1, int[] oppHistory2) {
+			float[][] probDists = new float[2][2];
+			
+			probDists[0] = findProbabilityDist(oppHistory1);
+			probDists[1] = findProbabilityDist(oppHistory2);
+			
+			float coopUtil = findExpectedUtility(0, probDists);
+			float defectUtil = findExpectedUtility(1, probDists);
+			
+			if(coopUtil > defectUtil)
+				return 0;
+			
+			return 1;
+		}
+		
+		float[] findProbabilityDist(int[] history){
+			float[] probDist = new float[2];
+			
+			for(int i = 0; i < history.length; i++){
+				probDist[history[i]]++;
+			}
+			
+			probDist[0] = probDist[0]/history.length;
+			probDist[1] = probDist[1]/history.length;
+			
+			return probDist;
+		}
+		
+		float findExpectedUtility(int action, float[][] probDists){
+			float expectedUtility = 0;
+			
+			for(int j = 0; j < 2; j++){
+				for(int k = 0; k < 2; k++){
+					expectedUtility += probDists[0][j]*probDists[1][k]*payoff[action][j][k];
+				}
+			}
+			
+			return expectedUtility;
+		}
+	}
 
 	
 	/* In our tournament, each pair of strategies will play one match against each other. 
@@ -162,7 +239,7 @@ public class ThreePrisonersDilemma {
 	 (strategies) in between matches. When you add your own strategy,
 	 you will need to add a new entry to makePlayer, and change numPlayers.*/
 	
-	int numPlayers = 6;
+	int numPlayers = 8;
 	Player makePlayer(int which) {
 		switch (which) {
 		case 0: return new NicePlayer();
@@ -171,6 +248,8 @@ public class ThreePrisonersDilemma {
 		case 3: return new TolerantPlayer();
 		case 4: return new FreakyPlayer();
 		case 5: return new T4TPlayer();
+		case 6: return new SimpleMajorityPlayer();
+		case 7: return new ExpectedUtilityPlayer();
 		}
 		throw new RuntimeException("Bad argument passed to makePlayer");
 	}
