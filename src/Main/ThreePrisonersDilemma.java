@@ -334,7 +334,7 @@ public class ThreePrisonersDilemma {
 	 * need to add a new entry to makePlayer, and change numPlayers.
 	 */
 
-	int numPlayers = 8;
+	int numPlayers = 7;
 
 	Player makePlayer(int which) {
 		switch (which) {
@@ -350,17 +350,10 @@ public class ThreePrisonersDilemma {
 			return new FreakyPlayer();
 		case 5:
 			return new T4TPlayer();
-		// case 6: return new SimpleMajorityPlayer();
-		// case 7: return new ExpectedUtilityPlayer();
-		// case 8: return new HybridPlayer();
 		case 6:
-			return new DonaldDuck();
-		case 7:
 			return new Mundhra_Shreyas_Sudhir_Player();
-		// case 0: return new SimpleMajorityPlayer();
-		// case 1: return new ExpectedUtilityPlayer();
-		// case 2: return new HybridPlayer();
-		// case 3: return new DonaldDuck();
+//		case 7:
+//			return new DonaldDuck();
 		}
 		throw new RuntimeException("Bad argument passed to makePlayer");
 	}
@@ -421,7 +414,7 @@ public class ThreePrisonersDilemma {
 		}
 
 		// ---------------TEST----------------//
-		HashMap<String, Float> latestPlayerPoints = new HashMap<>();
+//		HashMap<String, Float> latestPlayerPoints = new HashMap<>();
 		// ---------------TEST----------------//
 
 		// Finally, print out the sorted results.
@@ -432,12 +425,12 @@ public class ThreePrisonersDilemma {
 			System.out.println(makePlayer(sortedOrder[i]).name() + ": " + totalScore[sortedOrder[i]] + " points.");
 
 			// ---------------TEST----------------//
-			latestPlayerPoints.put(makePlayer(sortedOrder[i]).name(), totalScore[sortedOrder[i]]);
+//			latestPlayerPoints.put(makePlayer(sortedOrder[i]).name(), totalScore[sortedOrder[i]]);
 			// ---------------TEST----------------//
 		}
 
 		// ---------------TEST----------------//
-		FileIO.updateFile(latestPlayerPoints);
+//		FileIO.updateFile(latestPlayerPoints);
 		// ---------------TEST----------------//
 
 	} // end of runTournament()
