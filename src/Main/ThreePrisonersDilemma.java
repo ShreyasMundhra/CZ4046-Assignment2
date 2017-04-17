@@ -1,3 +1,4 @@
+package Main;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,7 +39,7 @@ public class ThreePrisonersDilemma {
 	 * can remember what your opponent did) and must compute the next action.
 	 */
 
-	abstract class Player {
+	static abstract class Player {
 		// This procedure takes in the number of rounds elapsed so far (n), and
 		// the previous plays in the match, and returns the appropriate action.
 		int selectAction(int n, int[] myHistory, int[] oppHistory1, int[] oppHistory2) {
@@ -333,7 +334,7 @@ public class ThreePrisonersDilemma {
 	 * need to add a new entry to makePlayer, and change numPlayers.
 	 */
 
-	int numPlayers = 7;
+	int numPlayers = 8;
 
 	Player makePlayer(int which) {
 		switch (which) {
@@ -354,6 +355,8 @@ public class ThreePrisonersDilemma {
 		// case 8: return new HybridPlayer();
 		case 6:
 			return new DonaldDuck();
+		case 7:
+			return new Mundhra_Shreyas_Sudhir_Player();
 		// case 0: return new SimpleMajorityPlayer();
 		// case 1: return new ExpectedUtilityPlayer();
 		// case 2: return new HybridPlayer();

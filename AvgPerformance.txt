@@ -1,0 +1,9 @@
+Number of tournaments:8
+NicePlayer:192.7609
+RandomPlayer:169.47327
+FreakyPlayer:177.09648
+T4TPlayer:209.48346
+DonaldDuck:214.05878
+TolerantPlayer:211.03075
+Main.Mundhra_Shreyas_Sudhir_Player:212.19614
+NastyPlayer:167.5022

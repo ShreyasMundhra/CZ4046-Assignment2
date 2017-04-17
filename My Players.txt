@@ -1,4 +1,5 @@
 HybridPlayer
 ExpectedUtilityPlayer
 SimpleMajorityPlayer
-TolerantDetectingPlayer
+DonaldDuck
+Mundhra_Shreyas_Sudhir_Player (Final)
